@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Shop Management</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' font-size='80' text-anchor='middle' dominant-baseline='central'%3E🍬%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        
+        body {
+            font-family: 'Inter', sans-serif; 
+        }
+        .message-box {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .message-box.success {
+            background-color: #d1fae5; 
+            color: #065f46; 
+            border: 1px solid #34d399; 
+        }
+        .message-box.error {
+            background-color: #fee2e2; 
+            color: #991b1b;
+            border: 1px solid #ef4444; 
+        }
+        /* Modal styles for confirmation dialogs and edit form */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-200 p-4 min-h-screen text-gray-800">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl p-8 space-y-8">
+        <h1 class="text-4xl font-extrabold text-center text-pink-600 mb-8">Sweet Shop Management</h1>
+
+        <!-- Message Box for user feedback -->
+        <div id="messageBox" class="message-box hidden"></div>
+
+        <!-- Add Sweet Form -->
+        <div class="bg-pink-50 p-6 rounded-lg shadow-inner space-y-4">
+            <h2 class="text-2xl font-bold text-pink-600 text-center mb-4">Add New Sweet</h2>
+            <form id="addSweetForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="sweetId" class="block text-sm font-medium text-gray-700">ID</label>
+                    <input type="text" id="sweetId" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" required>
+                </div>
+                <div>
+                    <label for="sweetName" class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="sweetName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" required>
+                </div>
+                <div>
+                    <label for="sweetCategory" class="block text-sm font-medium text-gray-700">Category</label>
+                    <input type="text" id="sweetCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" required>
+                </div>
+                <div>
+                    <label for="sweetPrice" class="block text-sm font-medium text-gray-700">Price</label>
+                    <input type="number" id="sweetPrice" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" min="0" step="0.01" required>
+                </div>
+                <div>
+                    <label for="sweetQuantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                    <input type="number" id="sweetQuantity" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" min="0" required>
+                </div>
+                <div class="md:col-span-2 flex justify-center mt-4">
+                    <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105">
+                        Add Sweet
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="bg-pink-50 p-6 rounded-lg shadow-inner space-y-4">
+            <h2 class="text-2xl font-bold text-pink-600 text-center mb-4">Search & Filter Sweets</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="searchQuery" class="block text-sm font-medium text-gray-700">Search by Name</label>
+                    <input type="text" id="searchQuery" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" placeholder="e.g., Kaju Katli">
+                </div>
+                <div>
+                    <label for="searchCategory" class="block text-sm font-medium text-gray-700">Filter by Category</label>
+                    <input type="text" id="searchCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" placeholder="e.g., Nut-Based">
+                </div>
+                <div class="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="searchPriceMin" class="block text-sm font-medium text-gray-700">Min Price</label>
+                        <input type="number" id="searchPriceMin" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label for="searchPriceMax" class="block text-sm font-medium text-gray-700">Max Price</label>
+                        <input type="number" id="searchPriceMax" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" min="0" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sweet List -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold text-pink-600 text-center mb-6">Available Sweets</h2>
+            <div id="sweetListContainer" class="overflow-x-auto">
+                <p class="text-center text-gray-600" id="noSweetsMessage">No sweets found. Add some sweets to get started!</p>
+                <table class="min-w-full divide-y divide-gray-200 hidden" id="sweetsTable">
+                    <thead class="bg-pink-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="sweetsTableBody">
+                        <!-- Sweet rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Edit Sweet Modal -->
+        <div id="editSweetModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeEditModal">&times;</span>
+                <h2 class="text-2xl font-bold text-pink-600 mb-6 text-center">Edit Sweet</h2>
+                <form id="editSweetForm" class="space-y-4">
+                    <input type="hidden" id="editSweetIdHidden">
+                    <div>
+                        <label for="editSweetName" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" id="editSweetName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" required>
+                    </div>
+                    <div>
+                        <label for="editSweetCategory" class="block text-sm font-medium text-gray-700">Category</label>
+                        <input type="text" id="editSweetCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" required>
+                    </div>
+                    <div>
+                        <label for="editSweetPrice" class="block text-sm font-medium text-gray-700">Price</label>
+                        <input type="number" id="editSweetPrice" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" min="0" step="0.01" required>
+                    </div>
+                    <div>
+                        <label for="editSweetQuantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                        <input type="number" id="editSweetQuantity" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-pink-500 focus:border-pink-500" min="0" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancelEditSweet" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-300">
+                            Cancel
+                        </button>
+                        <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                            Update Sweet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Sweet data stored locally in a JavaScript array.
+        // IMPORTANT: Data will NOT persist if the page is closed or refreshed in this version.
+        let sweets = [];
+
+        // DOM Elements
+        const messageBox = document.getElementById('messageBox');
+        const addSweetForm = document.getElementById('addSweetForm');
+        const sweetIdInput = document.getElementById('sweetId');
+        const sweetNameInput = document.getElementById('sweetName');
+        const sweetCategoryInput = document.getElementById('sweetCategory');
+        const sweetPriceInput = document.getElementById('sweetPrice');
+        const sweetQuantityInput = document.getElementById('sweetQuantity');
+
+        const sweetsTableBody = document.getElementById('sweetsTableBody');
+        const noSweetsMessage = document.getElementById('noSweetsMessage');
+        const sweetsTable = document.getElementById('sweetsTable');
+
+        const editSweetModal = document.getElementById('editSweetModal');
+        const closeEditModal = document.getElementById('closeEditModal');
+        const cancelEditSweet = document.getElementById('cancelEditSweet');
+        const editSweetForm = document.getElementById('editSweetForm');
+        const editSweetIdHidden = document.getElementById('editSweetIdHidden');
+        const editSweetNameInput = document.getElementById('editSweetName');
+        const editSweetCategoryInput = document.getElementById('editSweetCategory');
+        const editSweetPriceInput = document.getElementById('editSweetPrice');
+        const editSweetQuantityInput = document.getElementById('editSweetQuantity');
+
+        const searchQueryInput = document.getElementById('searchQuery');
+        const searchCategoryInput = document.getElementById('searchCategory');
+        const searchPriceMinInput = document.getElementById('searchPriceMin');
+        const searchPriceMaxInput = document.getElementById('searchPriceMax');
+
+
+        // --- Utility Functions ---
+
+        /**
+         * Displays a message to the user in the message box.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success' or 'error').
+         */
+        function showMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`; // Apply Tailwind classes for styling
+            messageBox.classList.remove('hidden'); // Make the message box visible
+            setTimeout(() => {
+                messageBox.classList.add('hidden'); 
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        
+        function renderSweets() {
+            sweetsTableBody.innerHTML = ''; 
+
+            const query = searchQueryInput.value.toLowerCase();
+            const category = searchCategoryInput.value.toLowerCase();
+            const minPrice = parseFloat(searchPriceMinInput.value);
+            const maxPrice = parseFloat(searchPriceMaxInput.value);
+
+            const filteredSweets = sweets.filter(sweet => {
+                const matchesName = sweet.name.toLowerCase().includes(query);
+                const matchesCategory = category === '' || sweet.category.toLowerCase().includes(category);
+                const matchesPriceMin = isNaN(minPrice) || sweet.price >= minPrice;
+                const matchesPriceMax = isNaN(maxPrice) || sweet.price <= maxPrice;
+                return matchesName && matchesCategory && matchesPriceMin && matchesPriceMax;
+            }).sort((a, b) => a.name.localeCompare(b.name)); 
+
+            if (filteredSweets.length === 0) {
+                noSweetsMessage.classList.remove('hidden'); 
+                sweetsTable.classList.add('hidden'); 
+            } else {
+                noSweetsMessage.classList.add('hidden'); 
+                sweetsTable.classList.remove('hidden'); 
+
+                filteredSweets.forEach(sweet => {
+                    const row = sweetsTableBody.insertRow();
+                    row.className = 'hover:bg-gray-50 transition duration-150'; 
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${sweet.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${sweet.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${sweet.category}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">$${sweet.price.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${sweet.quantity}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="openEditModal('${sweet.id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-md text-xs font-semibold transform transition duration-300 hover:scale-105">
+                                    Edit
+                                </button>
+                                <button onclick="deleteSweet('${sweet.id}')" class="bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded-md text-xs font-semibold transform transition duration-300 hover:scale-105">
+                                    Delete
+                                </button>
+                                <button onclick="purchaseSweet('${sweet.id}')" class="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-xs font-semibold transform transition duration-300 hover:scale-105">
+                                    Purchase
+                                </button>
+                                <button onclick="restockSweet('${sweet.id}')" class="bg-purple-500 hover:bg-purple-600 text-white py-2 px-3 rounded-md text-xs font-semibold transform transition duration-300 hover:scale-105">
+                                    Restock
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    sweetsTableBody.appendChild(row);
+                });
+            }
+        }
+
+        // --- Operations ---
+
+        /**
+         * Handles adding a new sweet to the inventory.
+         * @param {Event} e - The form submission event.
+         */
+        addSweetForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent default form submission (page reload)
+
+            // Get values from form inputs
+            const id = sweetIdInput.value.trim();
+            const name = sweetNameInput.value.trim();
+            const category = sweetCategoryInput.value.trim();
+            const price = parseFloat(sweetPriceInput.value);
+            const quantity = parseInt(sweetQuantityInput.value);
+
+            
+            if (!id || !name || !category || isNaN(price) || isNaN(quantity)) {
+                showMessage("All fields are required and must be valid numbers for price/quantity.", "error");
+                return;
+            }
+
+            
+            if (sweets.some(sweet => sweet.id === id)) {
+                showMessage("Sweet with this ID already exists.", "error");
+                return;
+            }
+
+            
+            sweets.push({ id, name, category, price, quantity });
+            showMessage("Sweet added successfully!", "success");
+            addSweetForm.reset(); 
+            renderSweets(); 
+        });
+
+        function openEditModal(sweetId) {
+            const sweetToEdit = sweets.find(sweet => sweet.id === sweetId);
+            if (sweetToEdit) {
+                editSweetIdHidden.value = sweetToEdit.id;
+                editSweetNameInput.value = sweetToEdit.name;
+                editSweetCategoryInput.value = sweetToEdit.category;
+                editSweetPriceInput.value = sweetToEdit.price;
+                editSweetQuantityInput.value = sweetToEdit.quantity;
+                editSweetModal.style.display = 'flex'; 
+            } else {
+                showMessage("Sweet not found for editing.", "error");
+            }
+        }
+
+        
+        editSweetForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = editSweetIdHidden.value;
+            const name = editSweetNameInput.value.trim();
+            const category = editSweetCategoryInput.value.trim();
+            const price = parseFloat(editSweetPriceInput.value);
+            const quantity = parseInt(editSweetQuantityInput.value);
+
+            const sweetIndex = sweets.findIndex(sweet => sweet.id === id);
+
+            if (sweetIndex !== -1) {
+                sweets[sweetIndex] = { id, name, category, price, quantity };
+                showMessage("Sweet updated successfully!", "success");
+                editSweetModal.style.display = 'none'; 
+                renderSweets(); 
+            } else {
+                showMessage("Sweet not found for update.", "error");
+            }
+        });
+
+        function deleteSweet(sweetId) {
+            // Using a custom confirmation dialog instead of window.confirm
+            const confirmDelete = document.createElement('div');
+            confirmDelete.className = 'modal'; 
+            confirmDelete.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Confirm Deletion</h2>
+                    <p class="text-center mb-6">Are you sure you want to delete this sweet?</p>
+                    <div class="flex justify-center space-x-4">
+                        <button id="confirmDeleteYes" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">Yes, Delete</button>
+                        <button id="confirmDeleteNo" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-300">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmDelete);
+            confirmDelete.style.display = 'flex'; 
+
+            document.getElementById('confirmDeleteYes').onclick = () => {
+                sweets = sweets.filter(sweet => sweet.id !== sweetId); // Filter out the sweet to delete
+                showMessage("Sweet deleted successfully!", "success");
+                renderSweets(); // Re-render the list
+                confirmDelete.remove(); // Remove the confirmation modal
+            };
+
+            document.getElementById('confirmDeleteNo').onclick = () => {
+                confirmDelete.remove(); 
+            };
+        }
+
+        function purchaseSweet(sweetId) {
+            const sweet = sweets.find(s => s.id === sweetId);
+            if (sweet) {
+                if (sweet.quantity > 0) {
+                    sweet.quantity--;
+                    showMessage(`Purchased one ${sweet.name}! Remaining: ${sweet.quantity}`, "success");
+                    renderSweets();
+                } else {
+                    showMessage("Not enough stock available for purchase.", "error");
+                }
+            } else {
+                showMessage("Sweet not found.", "error");
+            }
+        }
+
+        function restockSweet(sweetId) {
+            const sweet = sweets.find(s => s.id === sweetId);
+            if (sweet) {
+                sweet.quantity++;
+                showMessage(`Restocked one ${sweet.name}! New quantity: ${sweet.quantity}`, "success");
+                renderSweets();
+            } else {
+                showMessage("Sweet not found.", "error");
+            }
+        }
+
+       
+        closeEditModal.addEventListener('click', () => {
+            editSweetModal.style.display = 'none';
+        });
+        cancelEditSweet.addEventListener('click', () => {
+            editSweetModal.style.display = 'none';
+        });
+
+        
+        window.addEventListener('click', (event) => {
+            if (event.target === editSweetModal) {
+                editSweetModal.style.display = 'none';
+            }
+        });
+
+        
+        searchQueryInput.addEventListener('input', renderSweets);
+        searchCategoryInput.addEventListener('input', renderSweets);
+        searchPriceMinInput.addEventListener('input', renderSweets);
+        searchPriceMaxInput.addEventListener('input', renderSweets);
+
+        
+        document.addEventListener('DOMContentLoaded', renderSweets);
+
+        
+        if (sweets.length === 0) {
+            sweets.push(
+                { id: '1001', name: 'Kaju Katli', category: 'Nut-Based', price: 50.00, quantity: 20 },
+                { id: '1002', name: 'Gulab Jamun', category: 'Milk-Based', price: 10.00, quantity: 50 },
+                { id: '1003', name: 'Jalebi', category: 'Fried', price: 25.00, quantity: 30 },
+                { id: '1004', name: 'Barfi', category: 'Milk-Based', price: 40.00, quantity: 15 },
+                { id: '1005', name: 'Petha', category: 'Fruit-Based', price: 35.00, quantity: 22 }
+            );
+            renderSweets(); 
+        }
+    </script>
+</body>
+</html>
+
